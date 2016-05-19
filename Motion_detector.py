@@ -4,7 +4,7 @@ import time
 import sensorMap
 
 GPIO.setmode(GPIO.BCM)
-PIR_PIN = 7
+PIR_PIN = 26
 GPIO.setup(PIR_PIN, GPIO.IN)
 
 def MOTION(PIR_PIN):

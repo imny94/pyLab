@@ -1,12 +1,12 @@
 def sensorMap():
-    seat_1 = {'Pressure_mat' : 5 , 'identifier' : []}
+    station_1 = {'motion_sensor' : 26 , 'sonar' : [23,24]} #sonar : [trigger,echo]
             
-    seat_2 = {'Pressure_mat' : 5 , 'identifier' : []}
+    station_2 = {'motion_sensor' : 26 , 'sonar' : [23,24]}
             
-    seat_3 = {'Pressure_mat' : 5 , 'identifier' : []}
+    station_3 = {'motion_sensor' : 26 , 'sonar' : [23,24]}
     
-    sensorLocation = {'seat_1' : seat_1 ,
-                       'seat_2' : seat_2,
-                       'seat_3' : seat_3 } 
+    sensorLocation = {'station_1' : station_1 ,
+                       'station_2' : station_2,
+                       'station_3' : station_3 } 
             
     return sensorLocation
