@@ -19,7 +19,7 @@ def sonar(Trigger,Echo):
 
     counter = 0
     sonarList = []
-    while counter <= 50:
+    while counter <= 10: # This might be happening too fast
 
         while GPIO.input(Echo) != GPIO.LOW:
             print "waiting for GPIO pin to reset to low ..."
@@ -55,6 +55,7 @@ def sonar(Trigger,Echo):
         pulse_duration = pulse_end - pulse_start
         distance = pulse_duration * (sound_speed/2.0)
         sonarList.append(distance)
+        time.sleep(1.0)
 
     total = sum(sonarList)
     avg = total / 50.0
