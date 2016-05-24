@@ -3,8 +3,8 @@ import RPi.GPIO as GPIO
 import time
 import sensorMap
 
-url = "https://luminous-torch-6388.firebaseio.com/" 
-token = "VWfMVhwJ9USQIEgupRTVOOshNJzAS3pDV3WaeKNv"
+url = "https://sizzling-torch-109.firebaseio.com/" 
+token = "4tWC7ZSixm6Xp0HNVzyEWg3urMtxKlTnDLUwZXUq"
 firebase = firebase.FirebaseApplication(url, token)
 
 sensorLocation = sensorMap.sensorMap()
