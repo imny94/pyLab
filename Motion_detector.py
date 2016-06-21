@@ -3,6 +3,17 @@ import RPi.GPIO as GPIO
 import time
 import sensorMap
 
+station_1 = {'motion_sensor' : 26 , 'sonar' : [23,24]} #sonar : [trigger,echo]
+
+
+url = "https://sizzling-torch-109.firebaseio.com/" 
+token = "4tWC7ZSixm6Xp0HNVzyEWg3urMtxKlTnDLUwZXUq"
+firebase = firebase.FirebaseApplication(url, token)
+
+def uploadToFirebase(motion):
+    firebase.put('/','py_lab/station_1',motion)
+
+
 GPIO.setmode(GPIO.BCM)
 PIR_PIN = 26 # probably can link with sensorMap to make this module general
 GPIO.setup(PIR_PIN, GPIO.IN)
@@ -110,11 +121,13 @@ def MOTION(PIR_PIN): # this function should trigger the checking of distance usi
         stationState = "Occupied"
         troubleshootingInfo = None
     else:
+        stationState = 'Unoccupied'
         troubleshootingInfo = {'sonar1State' : sonar1state , 
                                 'sonar2State' : sonar2state }
         
     return {'state' : stationState ,
-            'troubleshootingInfo' : troubleshootingInfo }
+            'troubleshootingInfo' : troubleshootingInfo ,
+            'updateTime' : time.strftime("%H:%M:%S|%d/%m/%y") }
             
     
 def troubleshooting(orig_distance,sonarPin):  #sonarPin = [trigger,echo]
@@ -168,16 +181,46 @@ def eval_sonar(distance,sonarPin):
             return state
         else:
             return sonar_state_checker(troubleshooted)
+            
+def elapsedTime(activated_time):
+    return time.time() - activated_time
+
 
         
 print "PIR Module Test (CTRL+C to exit)"
 time.sleep(2)
 print "Ready"
+activated_time = time.time()
+troubleshootingInfo = None
+
+def updateTime():
+    return time.strftime("%H:%M:%S|%d/%m/%y")
 
 try:
-    GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=MOTION)
+    noMotion = {'state' : 'Unoccupied' ,
+            'troubleshootingInfo' : troubleshootingInfo ,
+            'updateTime' : updateTime()}
     while 1:
-        time.sleep(100)
+        if GPIO.input(PIR_PIN) == GPIO.HIGH:
+            motion = MOTION(PIR_PIN)
+            noMotion['troubleshootingInfo'] = motion['troubleshootingInfo']
+            if motion['state'] == 'Occupied':
+                uploadToFirebase(motion)
+                activated_time = time.time()
+            else:
+                if elapsedTime(activated_time) >= 900:
+                    uploadToFirebase(noMotion)
+                
+        else:
+            if elapsedTime(activated_time) >= 900: #15 minutes
+                
+                uploadToFirebase(noMotion)
+                activated_time = time.time()
+        time.sleep(1.0)
+    
+    #GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=MOTION)
+    #while 1:
+    #    time.sleep(100)
 except KeyboardInterrupt:
     print " Quit"
     GPIO.cleanup()
