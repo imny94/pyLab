@@ -38,7 +38,8 @@ def sonar(sonar_sensor): #sonar_sensor should come in a list, with the form [tri
     GPIO.setup(Trigger, GPIO.OUT)
     GPIO.setup(Echo, GPIO.IN)
 
-    GPIO.output(Trigger,False)
+    GPIO.output(Trigger,False) # To wait for sensor to settle)
+    time.sleep(2)
 
     counter = 0
     sonarList = []
