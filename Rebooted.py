@@ -7,10 +7,13 @@ import sensorMap
 #---------------------------------------SETTING UP STATION PARAMETERS---------------------------------------------------------------------------------------------------------------
 
 
-station_1 = {'motion_sensor' : 26 , 'sonar' : [23,24]} #sonar : [trigger,echo]
+stationNum = 1
+
+sensorLocation = sensorMap.sensorMap()
+stationData = sensorLocation['station_%d'%stationNum]  #station_1 = {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24]} #sonar : [trigger,echo]
 
 GPIO.setmode(GPIO.BCM)
-PIR_PIN = 26 # probably can link with sensorMap to make this module general
+PIR_PIN = stationData['motion_sensor'] # 26 # probably can link with sensorMap to make this module general
 GPIO.setup(PIR_PIN, GPIO.IN)
 
 
@@ -22,7 +25,7 @@ token = "4tWC7ZSixm6Xp0HNVzyEWg3urMtxKlTnDLUwZXUq"
 firebase = firebase.FirebaseApplication(url, token)
 
 def uploadToFirebase(motion):
-    firebase.put('/','py_lab/station_1',motion)
+    firebase.put('/','py_lab/station_%d'%stationNum , motion)
 
         
 #---------------------------------------SONAR BLOCK----------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +45,7 @@ def sonar(sonar_sensor): #sonar_sensor should come in a list, with the form [tri
     time.sleep(2)
     
     GPIO.output(Trigger, True)
-    time.sleep(0.00001)
+    time.sleep(0.0001)
     GPIO.output(Trigger, False)
     
     while GPIO.input(Echo)==0:
@@ -65,8 +68,8 @@ def MOTION(PIR_PIN): # this function should trigger the checking of distance usi
     
     print "Motion Detected!"
     
-    sonar1pin = [23,24] #toy values to make code work, final should obtain values from sensorMap
-    sonar2pin = [23,24]
+    sonar1pin = stationData['sonar1'] #[23,24] #toy values to make code work, final should obtain values from sensorMap
+    sonar2pin = stationData['sonar2'] #[23,24]
     
     print "Calling Sonar sensors 6 times, please wait for 12 seconds"
     
