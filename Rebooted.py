@@ -25,8 +25,10 @@ token = "4tWC7ZSixm6Xp0HNVzyEWg3urMtxKlTnDLUwZXUq"
 firebase = firebase.FirebaseApplication(url, token)
 
 def uploadToFirebase(motion):
+    print 'uploading to firebase ...'
     firebase.put('/','py_lab/station_%d'%stationNum , motion)
-
+    print ' \n Upload Complete! \n '
+    
         
 #---------------------------------------SONAR BLOCK----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,7 +47,7 @@ def sonar(sonar_sensor): #sonar_sensor should come in a list, with the form [tri
     time.sleep(2)
     
     GPIO.output(Trigger, True)
-    time.sleep(0.0001)
+    time.sleep(0.00001)
     GPIO.output(Trigger, False)
     
     while GPIO.input(Echo)==0:
@@ -57,6 +59,7 @@ def sonar(sonar_sensor): #sonar_sensor should come in a list, with the form [tri
     pulse_duration = pulse_end - pulse_start
     distance = pulse_duration * (sound_speed/2.0)
     
+    print distance
     return distance
 
         
@@ -83,14 +86,19 @@ def MOTION(PIR_PIN): # this function should trigger the checking of distance usi
                         )
                         # This takes in 3 measurements from the 2 sonar sensors in an alternate fashion, with each sensor given 2 seconds to rest in between
                         
+    distance1List = []
+    distance2List = []
+                        
     for num in range(0,len(rawMeasurements)-1,2):
-        distance1List = rawMeasurements[num]
+        distance1List.append(rawMeasurements[num])
          
     for num in range(1,len(rawMeasurements)-1,2):
-        distance2List = rawMeasurements[num]
+        distance2List.append(rawMeasurements[num])
         
     distance1 = sum(distance1List) / len(distance1List)
     distance2 = sum(distance2List) / len(distance2List)
+    
+    print 'sonar1 reads : %0.2f ; sonar2 reads : %0.2f'%(distance1,distance2) 
     
     sonar1state = eval_sonar(distance1,sonar1pin)
     sonar2state = eval_sonar(distance2,sonar2pin)
@@ -161,12 +169,15 @@ try:
     while 1:
         if GPIO.input(PIR_PIN) == GPIO.HIGH:
             motion = MOTION(PIR_PIN)
-            if motion['state'] == 'Occupied':
-                uploadToFirebase(motion)
-                activated_time = time.time()
-            else:
-                if elapsedTime(activated_time) >= 900:
-                    uploadToFirebase(noMotion)
+            uploadToFirebase(motion)
+            activated_time = time.time()
+            
+            #if motion['state'] == 'Occupied':
+            #    uploadToFirebase(motion)
+            #    activated_time = time.time()
+            #else:
+            #    if elapsedTime(activated_time) >= 900:
+            #        uploadToFirebase(noMotion)
                 
         else:
             if elapsedTime(activated_time) >= 900: #15 minutes
