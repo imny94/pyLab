@@ -10,11 +10,13 @@ import sensorMap
 stationNum = 1
 
 sensorLocation = sensorMap.sensorMap()
-stationData = sensorLocation['station_%d'%stationNum]  #station_1 = {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24]} #sonar : [trigger,echo]
+stationData = sensorLocation['station_%d'%stationNum]  #{'Top' : {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24] } ,'Bottom' : {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24]} }
 
 GPIO.setmode(GPIO.BCM)
-PIR_PIN = stationData['motion_sensor'] # 26 # probably can link with sensorMap to make this module general
-GPIO.setup(PIR_PIN, GPIO.IN)
+PIR_PIN_TOP = stationData['Top']['motion_sensor'] # 26 # probably can link with sensorMap to make this module general
+PIR_PIN_BOTTOM = stationData['Bottom']['motion_sensor']
+GPIO.setup(PIR_PIN_TOP, GPIO.IN)
+GPIO.setup(PIR_PIN_BOTTOM, GPIO.IN)
 
 
 #---------------------------------------FIREBASE ESSENTIALS-------------------------------------------------------------------------------------------------------------------------
@@ -66,13 +68,13 @@ def sonar(sonar_sensor): #sonar_sensor should come in a list, with the form [tri
 #---------------------------------------MOTION BLOCK----------------------------------------------------------------------------------------------------------------------------------------
 
 
-def MOTION(PIR_PIN): # this function should trigger the checking of distance using ultrasonic sensor
+def MOTION(top_Bottom): # this function should trigger the checking of distance using ultrasonic sensor
     # This function will do the evaluation of the motion it detects and return the state of the station
     
     print "Motion Detected!"
     
-    sonar1pin = stationData['sonar1'] #[23,24] #toy values to make code work, final should obtain values from sensorMap
-    sonar2pin = stationData['sonar2'] #[23,24]
+    sonar1pin = stationData[top_Bottom]['sonar1'] #[23,24] #toy values to make code work, final should obtain values from sensorMap
+    sonar2pin = stationData[top_Bottom]['sonar2'] #[23,24]
     
     print "Calling Sonar sensors 6 times, please wait for 12 seconds"
     
@@ -167,10 +169,17 @@ try:
     noMotion = {'state' : 'Unoccupied' ,
             'updateTime' : updateTime()}
     while 1:
-        if GPIO.input(PIR_PIN) == GPIO.HIGH:
-            motion = MOTION(PIR_PIN)
-            uploadToFirebase(motion)
-            activated_time = time.time()
+        if GPIO.input(PIR_PIN_TOP) == GPIO.HIGH or GPIO.input(PIR_PIN_TOP) == GPIO.HIGH:
+            motionTop = MOTION('Top')
+            motionBottom = MOTION('Bottom')
+            
+            if motionTop['state'] == 'Occupied':
+                uploadToFirebase(motionTop)
+                activated_time = time.time()
+                
+            if motionBottom['state'] == 'Occupied':
+                uploadToFirebase(motionTop)
+                activated_time = time.time()
             
             #if motion['state'] == 'Occupied':
             #    uploadToFirebase(motion)
@@ -186,7 +195,7 @@ try:
                 activated_time = time.time()
         time.sleep(1.0)
     
-    #GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=MOTION)
+    #GPIO.add_event_detect(PIR_PIN_TOP, GPIO.RISING, callback=MOTION)
     #while 1:
     #    time.sleep(100)
     
