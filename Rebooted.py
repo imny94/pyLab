@@ -111,10 +111,18 @@ def MOTION(top_Bottom): # this function should trigger the checking of distance 
     else:
         if sonar1state == 'too_far' or sonar2state == 'too_far': # Think through this condition again... There's a troubleshooting function get_issue(state) to determine what's the issue registered
             stationState = 'Unoccupied'
+        else:
+            stationState = 'Problematic'
+            
+    if sonar1state == 'blocked' or sonar1state == 'invalid_lower' or sonar1state == 'invalid_upper':
+        get_issue(sonar1state,sonar1pin)
+        
+    if sonar2state == 'blocked' or sonar2state == 'invalid_lower' or sonar2state == 'invalid_upper':
+        get_issue(sonar2state,sonar2pin)
         
     
     return {'state' : stationState ,
-            'updateTime' : time.strftime("%H:%M:%S|%d/%m/%y") }
+            'updateTime' : time.strftime("%H:%M:%S|%d/%m/%y") } #Should add an extra parameter to include troubleshooting info here once troubleshooting is done up
             
         
 #---------------------------------------EVALUATION BLOCK--------------------------------------------------------------------------------------------------------------------------------
@@ -154,13 +162,15 @@ def eval_sonar(distance,sonarPin):    #  EXTRA ARGUMENT HERE FOR TROUBLESHOOTING
 #---------------------------------------TROUBLESHOOTING BLOCK-----------------------------------------------------------------------------------------------------------------------
 
 
-def get_issue(state):
+def get_issue(state,sonarPin): #Should call some troubleshooting steps like testing the sensors in this step, but it's not here yet 
+                            #but should try to make it call a troubleshooting mehod that is not defined within this thread, so this thread continues to run and not gets stuck here
     if state == 'blocked':
         print 'Sonar sensor is blocked, this is affecting seat readings...'
     elif state == 'invalid_lower':
         print 'Sonar sensor is receiving weird readings where it measures distances smaller than it\' maximum measurable distance... do something...'
     elif state == "invalid_upper":
         print "Sonar sensor is receiving weird readings where it measures distances greater than is's maximum measurable distance... do something..."
+        
 
 #---------------------------------------EXECUTIONAL BLOCK----------------------------------------------------------------------------------------------------------------------------
 
@@ -190,7 +200,7 @@ try:
                 activated_time = time.time()
                 
             if motionBottom['state'] == 'Occupied':
-                uploadToFirebase(motionTop)
+                uploadToFirebase(motionBottom)
                 activated_time = time.time()
             
             #if motion['state'] == 'Occupied':
