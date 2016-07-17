@@ -102,14 +102,16 @@ def MOTION(top_Bottom): # this function should trigger the checking of distance 
     
     print 'sonar1 reads : %0.2f ; sonar2 reads : %0.2f'%(distance1,distance2) 
     
-    sonar1state = eval_sonar(distance1,sonar1pin)
+    sonar1state = eval_sonar(distance1,sonar1pin) # Returns either ('valid' , 'too_far' , 'blocked' , 'invalid_lower' , 'invalid_upper')
     sonar2state = eval_sonar(distance2,sonar2pin)
     
     if sonar1state == 'valid' or sonar2state == 'valid':
         stationState = "Occupied"
-    
+
     else:
-        stationState = 'Unoccupied'
+        if sonar1state == 'too_far' or sonar2state == 'too_far': # Think through this condition again... There's a troubleshooting function get_issue(state) to determine what's the issue registered
+            stationState = 'Unoccupied'
+        
     
     return {'state' : stationState ,
             'updateTime' : time.strftime("%H:%M:%S|%d/%m/%y") }
@@ -148,7 +150,17 @@ def eval_sonar(distance,sonarPin):    #  EXTRA ARGUMENT HERE FOR TROUBLESHOOTING
     
     #if state == 'valid' or state == 'too_far' or state == 'blocked':
     #    return state
+    
+#---------------------------------------TROUBLESHOOTING BLOCK-----------------------------------------------------------------------------------------------------------------------
 
+
+def get_issue(state):
+    if state == 'blocked':
+        print 'Sonar sensor is blocked, this is affecting seat readings...'
+    elif state == 'invalid_lower':
+        print 'Sonar sensor is receiving weird readings where it measures distances smaller than it\' maximum measurable distance... do something...'
+    elif state == "invalid_upper":
+        print "Sonar sensor is receiving weird readings where it measures distances greater than is's maximum measurable distance... do something..."
 
 #---------------------------------------EXECUTIONAL BLOCK----------------------------------------------------------------------------------------------------------------------------
 
