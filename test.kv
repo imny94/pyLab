@@ -1,0 +1,116 @@
+#: import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+ScreenManagement:
+    transition: FadeTransition()
+    HomeScreen:
+    AdvancedScreen:
+    
+<HomeScreen>:
+    name: "Home"
+    
+    BoxLayout:
+        spacing: 30
+        padding: 10
+        orientation: 'vertical'
+        
+        Button:
+            text: '[i]Py Lab Station Occupancy[/i]'
+            markup: True
+            font_size: 30
+            size_hint: (1,0.4)
+            background_color: [0.5,0.5,0.5,0.5]
+            
+        GridLayout:
+            spacing: 5
+            padding: 10
+            cols: 2
+        
+            Label:
+                text: '[i]Station 1[/i]'
+                markup: True
+                font_size: 22
+                size_hint: (0.5,0.6) 
+            Label:
+                text: root.stations.getInfo(1)
+                markup: True
+                font_size: 22
+                size_hint: (1,0.6) 
+                
+                
+            Label:
+                text: '[i]Station 2[/i]'
+                markup: True
+                font_size: 22
+                size_hint: (0.5,0.6) 
+            Label:
+                text: root.stations.getInfo(2)
+                markup: True
+                font_size: 22
+                size_hint: (1,0.6) 
+                
+                
+            Label:
+                text: '[i]Station 3[/i]'
+                markup: True
+                font_size: 22
+                size_hint: (0.5,0.6) 
+            Label:
+                text: root.stations.getInfo(3)
+                markup: True
+                font_size: 22
+                size_hint: (1,0.6) 
+                
+        Label:
+            text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
+            markup: True
+            font_size: 22
+            size_hint: (0.5,0.6) 
+        
+        #AnchorLayout:
+        #    anchor_x: 'center'
+        #    anchor_y: 'bottom'
+        #    padding: [0,0,0,0]
+            #
+            #Label:
+            #    text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
+            #    markup: True
+            #    font_size: 22
+            #    size: 50,50
+            #    #size_hint: (0.5,0.6) 
+            
+        GridLayout:
+            spacing: 5
+            padding: 10
+            cols: 2
+            
+            Button:
+                text: '[i]Refresh Page[/i]'
+                markup: True
+                font_size: 30
+                size_hint: (1,0.4)
+                background_color: [0.5,0.5,0.5,0.5]
+                on_release: root.stations.refresh()
+                
+            Button:
+                text: '[i]Advanced[/i]'
+                markup: True
+                font_size: 30
+                size_hint: (1,0.4)
+                background_color: [0.5,0.5,0.5,0.5]
+                on_release: app.root.current = 'Advanced'
+                
+<AdvancedScreen>:
+    name: "Advanced"
+    
+    Label:
+        text: root.server.listAllData()
+        
+    FloatLayout:
+        Button:
+            color: 0,1,0,1
+            font_size: 25
+            size_hint: 0.3,0.2
+            text: "Back"
+            on_release: app.root.current = 'Home'
+            pos_hint: {'right':1 , 'top':1}
+            

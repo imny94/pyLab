@@ -191,7 +191,7 @@ try:
     noMotion = {'state' : 'Unoccupied' ,
             'updateTime' : updateTime()}
     while 1:
-        if GPIO.input(PIR_PIN_TOP) == GPIO.HIGH or GPIO.input(PIR_PIN_TOP) == GPIO.HIGH:
+        if GPIO.input(PIR_PIN_TOP) == GPIO.HIGH or GPIO.input(PIR_PIN_BOTTOM) == GPIO.HIGH:
             motionTop = MOTION('Top')
             motionBottom = MOTION('Bottom')
             
