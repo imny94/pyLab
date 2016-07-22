@@ -215,6 +215,7 @@ try:
                 
                 uploadToFirebase(noMotion)
                 activated_time = time.time()
+            print "no motion"
         time.sleep(1.0)
     
     #GPIO.add_event_detect(PIR_PIN_TOP, GPIO.RISING, callback=MOTION)
