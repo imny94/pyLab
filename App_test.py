@@ -7,7 +7,7 @@ import firebase
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen , FadeTransition
-from kivy.properties import StringProperty, DictProperty
+from kivy.properties import StringProperty, DictProperty , ObjectProperty
 import time
 
 #-------------------------------GLOBAL FUNCTIONS------------------------------------------
@@ -18,18 +18,25 @@ firebase = firebase.FirebaseApplication(url, token)
 
 class ServerClass(Widget):
     
+    allData = ObjectProperty()
+    
     def accessFirebase(self):
+        print "Accessing Firebase, please wait a moment..."
         return firebase.get('/py_lab')
         
-    def listAllData(self):
+    def listAllFirebaseData(self):
         data = self.accessFirebase()
         dataList = []
         for item in data.iteritems():
             dataList.append(item)
-        final = ""
+        self.allData = ""
         for item in dataList:
-            final += str(item) + "\n"
-        return final
+            self.allData += str(item) + "\n"
+        return self.allData
+        
+    def __init__(self,**kwargs):
+        super(ServerClass, self).__init__(**kwargs)
+        self.listAllFirebaseData()
         
 
 
@@ -41,11 +48,17 @@ class StationData(Widget):
     serverInstance = ServerClass()
     allStationData = DictProperty()
     refreshTime = StringProperty()
+    stationDict = DictProperty()
     
     def __init__(self, **kwargs):
         super(StationData, self).__init__(**kwargs)
         self.allStationData = self.serverInstance.accessFirebase()# {'station_1' : {'state': "Occupied", 'updateTime': " time "} , 'station_2' ....}
         self.refreshTime = time.strftime("%H:%M:%S|%d/%m/%y")
+        self.stationDict = {}
+        
+        numOfStations = 3 ### HARDCODED ------BAD ------------
+        for i in range(1,numOfStations + 1):
+            self.stationDict['station_%d'%i] = self.getInfo(i)
     
     def getInfo(self,stationNum):
         stationData = self.allStationData['station_%d'%stationNum]
@@ -56,26 +69,25 @@ class StationData(Widget):
     def refresh(self):
         self.allStationData = self.serverInstance.accessFirebase()
         self.refreshTime = time.strftime("%H:%M:%S|%d/%m/%y")
-        
+        for stationNum in range(1,len(self.stationDict) +1 ):
+            self.stationDict['station_%d'%stationNum] = self.getInfo(stationNum)
+             
     def getRefreshTime(self):
         return "[i]Last Refresh Time[/i] : &s" %self.refreshTime
+
         
-stations = StationData()
-print "I passed here"
-print stations.getInfo(1)
+#stations = StationData(numOfStations = 3)
+#print "I passed here"
+#print stations.stationDict
 
 
 #-------------------------------GUI------------------------------------------------------
 
-class HomeScreen(Screen,StationData,ServerClass):
+class HomeScreen(Screen,StationData):
     stations = StationData()
-    server = ServerClass()
-    pass
     
-class AdvancedScreen(Screen,StationData,ServerClass):
+class AdvancedScreen(Screen,StationData):
     stations = StationData()
-    server = ServerClass()
-    pass
     
 class ScreenManagement(ScreenManager):
     pass
@@ -85,10 +97,7 @@ presentation = Builder.load_file('test.kv')
 class MainApp(App):
     
     def build(self):
-        #stations = StationData()
-        #stations.getInfo()
-        #stations.refresh()
-        #stations.getRefreshTime()
+        
         return presentation
         
 if __name__ == "__main__":

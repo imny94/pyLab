@@ -5,6 +5,16 @@ ScreenManagement:
     HomeScreen:
     AdvancedScreen:
     
+<StationLabel@Label>:
+    markup: True
+    font_size: 22
+    size_hint: (0.5,0.6)
+    
+<StationInfo@Label>:
+    markup: True
+    font_size: 22
+    size_hint: (1,0.6) 
+    
 <HomeScreen>:
     name: "Home"
     
@@ -13,52 +23,41 @@ ScreenManagement:
         padding: 10
         orientation: 'vertical'
         
-        Button:
+        Label: #Button
             text: '[i]Py Lab Station Occupancy[/i]'
             markup: True
             font_size: 30
             size_hint: (1,0.4)
-            background_color: [0.5,0.5,0.5,0.5]
+            #background_color: [0.5,0.5,0.5,0.5]
             
         GridLayout:
             spacing: 5
             padding: 10
             cols: 2
         
-            Label:
+            StationLabel:
+                id: station_1
                 text: '[i]Station 1[/i]'
-                markup: True
-                font_size: 22
-                size_hint: (0.5,0.6) 
-            Label:
-                text: root.stations.getInfo(1)
-                markup: True
-                font_size: 22
-                size_hint: (1,0.6) 
+                 
+            StationInfo:
+                text: root.stations.stationDict['station_1'] 
                 
                 
-            Label:
+            StationLabel:
+                id: station_2
                 text: '[i]Station 2[/i]'
-                markup: True
-                font_size: 22
-                size_hint: (0.5,0.6) 
-            Label:
-                text: root.stations.getInfo(2)
-                markup: True
-                font_size: 22
-                size_hint: (1,0.6) 
+                 
+            StationInfo:
+                text: root.stations.stationDict['station_2']
                 
                 
-            Label:
+            StationLabel:
+                id: station_2
                 text: '[i]Station 3[/i]'
-                markup: True
-                font_size: 22
-                size_hint: (0.5,0.6) 
-            Label:
-                text: root.stations.getInfo(3)
-                markup: True
-                font_size: 22
-                size_hint: (1,0.6) 
+                 
+            StationInfo:
+                text: root.stations.stationDict['station_3']
+                
                 
         Label:
             text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
@@ -103,7 +102,15 @@ ScreenManagement:
     name: "Advanced"
     
     Label:
-        text: root.server.listAllData()
+        text: root.stations.serverInstance.allData
+        
+    Button:
+        text: '[i]List All Data From Firebase[/i]'
+        markup: True
+        font_size: 30
+        size_hint: (1,0.4)
+        background_color: [0.5,0.5,0.5,0.5]
+        on_release: root.stations.serverInstance.listAllFirebaseData()
         
     FloatLayout:
         Button:
