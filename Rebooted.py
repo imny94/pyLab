@@ -14,9 +14,9 @@ stationData = sensorLocation['station_%d'%stationNum]  #{'Top' : {'motion_sensor
 
 GPIO.setmode(GPIO.BCM)
 PIR_PIN_TOP = stationData['Top']['motion_sensor'] # 26 # probably can link with sensorMap to make this module general
-PIR_PIN_BOTTOM = stationData['Bottom']['motion_sensor']
+#PIR_PIN_BOTTOM = stationData['Bottom']['motion_sensor']
 GPIO.setup(PIR_PIN_TOP, GPIO.IN)
-GPIO.setup(PIR_PIN_BOTTOM, GPIO.IN)
+#GPIO.setup(PIR_PIN_BOTTOM, GPIO.IN)
 
 
 #---------------------------------------FIREBASE ESSENTIALS-------------------------------------------------------------------------------------------------------------------------
@@ -74,51 +74,53 @@ def MOTION(top_Bottom): # this function should trigger the checking of distance 
     print "Motion Detected!"
     
     sonar1pin = stationData[top_Bottom]['sonar1'] #[23,24] #toy values to make code work, final should obtain values from sensorMap
-    sonar2pin = stationData[top_Bottom]['sonar2'] #[23,24]
+    #sonar2pin = stationData[top_Bottom]['sonar2'] #[23,24]
     
     print "Calling Sonar sensors 6 times, please wait for 12 seconds"
     
     rawMeasurements = (
                         sonar(sonar1pin) , 
-                        sonar(sonar2pin) , 
+                        #sonar(sonar2pin) , 
                         sonar(sonar1pin) , 
-                        sonar(sonar2pin) , 
+                        #sonar(sonar2pin) , 
                         sonar(sonar1pin) , 
-                        sonar(sonar2pin)
+                        #sonar(sonar2pin)
                         )
                         # This takes in 3 measurements from the 2 sonar sensors in an alternate fashion, with each sensor given 2 seconds to rest in between
                         
-    distance1List = []
-    distance2List = []
-                        
-    for num in range(0,len(rawMeasurements)-1,2):
-        distance1List.append(rawMeasurements[num])
-         
-    for num in range(1,len(rawMeasurements)-1,2):
-        distance2List.append(rawMeasurements[num])
-        
-    distance1 = sum(distance1List) / len(distance1List)
-    distance2 = sum(distance2List) / len(distance2List)
+    #distance1List = []
+    #distance2List = []
+    #                    
+    #for num in range(0,len(rawMeasurements)-1,2):
+    #    distance1List.append(rawMeasurements[num])
+    #     
+    #for num in range(1,len(rawMeasurements)-1,2):
+    #    distance2List.append(rawMeasurements[num])
+    #    
+    #distance1 = sum(distance1List) / len(distance1List)
+    #distance2 = sum(distance2List) / len(distance2List)
+    #
+    #print 'sonar1 reads : %0.2f ; sonar2 reads : %0.2f'%(distance1,distance2) 
     
-    print 'sonar1 reads : %0.2f ; sonar2 reads : %0.2f'%(distance1,distance2) 
+    distance1 = (sum(rawMeasurements)/len(rawMeasurements))
     
     sonar1state = eval_sonar(distance1,sonar1pin) # Returns either ('valid' , 'too_far' , 'blocked' , 'invalid_lower' , 'invalid_upper')
-    sonar2state = eval_sonar(distance2,sonar2pin)
+    #sonar2state = eval_sonar(distance2,sonar2pin)
     
-    if sonar1state == 'valid' or sonar2state == 'valid':
+    if sonar1state == 'valid': #or sonar2state == 'valid':
         stationState = "Occupied"
 
     else:
-        if sonar1state == 'too_far' or sonar2state == 'too_far': # Think through this condition again... There's a troubleshooting function get_issue(state) to determine what's the issue registered
+        if sonar1state == 'too_far': #or sonar2state == 'too_far': # Think through this condition again... There's a troubleshooting function get_issue(state) to determine what's the issue registered
             stationState = 'Unoccupied'
         else:
             stationState = 'Problematic'
             
-    if sonar1state == 'blocked' or sonar1state == 'invalid_lower' or sonar1state == 'invalid_upper':
+    if sonar1state == 'blocked' or sonar1state == 'invalid_lower':# or sonar1state == 'invalid_upper':
         get_issue(sonar1state,sonar1pin)
         
-    if sonar2state == 'blocked' or sonar2state == 'invalid_lower' or sonar2state == 'invalid_upper':
-        get_issue(sonar2state,sonar2pin)
+    #if sonar2state == 'blocked' or sonar2state == 'invalid_lower' or sonar2state == 'invalid_upper':
+    #    get_issue(sonar2state,sonar2pin)
         
     
     return {'state' : stationState ,
@@ -191,17 +193,17 @@ try:
     noMotion = {'state' : 'Unoccupied' ,
             'updateTime' : updateTime()}
     while 1:
-        if GPIO.input(PIR_PIN_TOP) == GPIO.HIGH or GPIO.input(PIR_PIN_BOTTOM) == GPIO.HIGH:
+        if GPIO.input(PIR_PIN_TOP) == GPIO.HIGH:# or GPIO.input(PIR_PIN_BOTTOM) == GPIO.HIGH:
             motionTop = MOTION('Top')
-            motionBottom = MOTION('Bottom')
+            #motionBottom = MOTION('Bottom')
             
             if motionTop['state'] == 'Occupied':
                 uploadToFirebase(motionTop)
                 activated_time = time.time()
                 
-            if motionBottom['state'] == 'Occupied':
-                uploadToFirebase(motionBottom)
-                activated_time = time.time()
+            #if motionBottom['state'] == 'Occupied':
+            #    uploadToFirebase(motionBottom)
+            #    activated_time = time.time()
             
             #if motion['state'] == 'Occupied':
             #    uploadToFirebase(motion)
