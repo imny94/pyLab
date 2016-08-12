@@ -5,30 +5,45 @@ ScreenManagement:
     HomeScreen:
     AdvancedScreen:
     
-<StationLabel@Label>:
-    markup: True
-    font_size: 22
-    size_hint: (0.5,0.6)
+<LabelwColor@Label>:
+    bcolor: 0.1,0,0,1
+    canvas.before:
+        Color:
+            rgba: self.bcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
     
-<StationInfo@Label>:
+<StationLabel@LabelwColor>:
     markup: True
-    font_size: 22
-    size_hint: (1,0.6) 
+    font_size: 24
+    size_hint: (0.5,1)
+    bcolor: 0.3,0.3,0.3,0.4
     
+<StationInfo@LabelwColor>:
+    markup: True
+    font_size: 20
+    halign: 'center'
+
 <HomeScreen>:
     name: "Home"
-    
+    Image: 
+        source: 'D:/Backup/SUTD/Introduction to Digital World/1D Anti-hogging/SeatApp/staircase.jpg'
+        pos_hint: {'center_x':0.5, 'center_y':0.5}
+        allow_stretch: True
+        
     BoxLayout:
-        spacing: 30
+        spacing: 5
         padding: 10
         orientation: 'vertical'
         
-        Label: #Button
+        LabelwColor: 
             text: '[i]Py Lab Station Occupancy[/i]'
             markup: True
+            bcolor: 0.3,0.3,0.3,0.4
             font_size: 30
-            size_hint: (1,0.4)
-            #background_color: [0.5,0.5,0.5,0.5]
+            size_hint: (1,0.6)
             
         GridLayout:
             spacing: 5
@@ -41,52 +56,42 @@ ScreenManagement:
                  
             StationInfo:
                 text: root.stations.stationDict['station_1'] 
-                
-                
+                bcolor: root.colorscheme(self.text)
+                           
             StationLabel:
                 id: station_2
                 text: '[i]Station 2[/i]'
                  
             StationInfo:
                 text: root.stations.stationDict['station_2']
+                bcolor: root.colorscheme(self.text)
                 
                 
             StationLabel:
-                id: station_2
+                id: station_3
                 text: '[i]Station 3[/i]'
                  
             StationInfo:
                 text: root.stations.stationDict['station_3']
-                
-                
-        Label:
+                bcolor: root.colorscheme(self.text)
+                         
+        LabelwColor:
             text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
             markup: True
             font_size: 22
-            size_hint: (0.5,0.6) 
-        
-        #AnchorLayout:
-        #    anchor_x: 'center'
-        #    anchor_y: 'bottom'
-        #    padding: [0,0,0,0]
-            #
-            #Label:
-            #    text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
-            #    markup: True
-            #    font_size: 22
-            #    size: 50,50
-            #    #size_hint: (0.5,0.6) 
+            bcolor: 0.3,0.3,0.3,0.4
+            size_hint: (1,0.3)         
             
         GridLayout:
             spacing: 5
             padding: 10
             cols: 2
+            size_hint: (1,0.6)
             
             Button:
                 text: '[i]Refresh Page[/i]'
                 markup: True
                 font_size: 30
-                size_hint: (1,0.4)
                 background_color: [0.5,0.5,0.5,0.5]
                 on_release: root.stations.refresh()
                 
@@ -94,7 +99,6 @@ ScreenManagement:
                 text: '[i]Advanced[/i]'
                 markup: True
                 font_size: 30
-                size_hint: (1,0.4)
                 background_color: [0.5,0.5,0.5,0.5]
                 on_release: app.root.current = 'Advanced'
                 
@@ -120,4 +124,3 @@ ScreenManagement:
             text: "Back"
             on_release: app.root.current = 'Home'
             pos_hint: {'right':1 , 'top':1}
-            

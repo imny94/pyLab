@@ -53,12 +53,13 @@ class StationData(Widget):
     def __init__(self, **kwargs):
         super(StationData, self).__init__(**kwargs)
         self.allStationData = self.serverInstance.accessFirebase()# {'station_1' : {'state': "Occupied", 'updateTime': " time "} , 'station_2' ....}
-        self.refreshTime = time.strftime("%H:%M:%S|%d/%m/%y")
+        self.refreshTime = time.strftime("%H:%M:%S | %d/%m/%y")
         self.stationDict = {}
         
         numOfStations = 3 ### HARDCODED ------BAD ------------
         for i in range(1,numOfStations + 1):
             self.stationDict['station_%d'%i] = self.getInfo(i)
+            
     
     def getInfo(self,stationNum):
         stationData = self.allStationData['station_%d'%stationNum]
@@ -68,7 +69,7 @@ class StationData(Widget):
         
     def refresh(self):
         self.allStationData = self.serverInstance.accessFirebase()
-        self.refreshTime = time.strftime("%H:%M:%S|%d/%m/%y")
+        self.refreshTime = time.strftime("%H:%M:%S | %d/%m/%y")
         for stationNum in range(1,len(self.stationDict) +1 ):
             self.stationDict['station_%d'%stationNum] = self.getInfo(stationNum)
              
@@ -85,6 +86,9 @@ class StationData(Widget):
 
 class HomeScreen(Screen,StationData):
     stations = StationData()
+    def colorscheme(self,inp): #this pulls the desired background color of the 'label' depending on state
+        if 'Occupied' in inp: return [0.8,0,0,0.8]
+        else: return [0,0.8,0,0.8]
     
 class AdvancedScreen(Screen,StationData):
     stations = StationData()
