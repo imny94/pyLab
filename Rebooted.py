@@ -13,6 +13,8 @@ class Station():
 
     def __init__(self,stationNum):
         
+        self.stationNum = stationNum
+        
         self.name = "station%d" %stationNum
         
         sensorLocation = sensorMap.sensorMap()
