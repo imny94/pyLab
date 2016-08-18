@@ -29,6 +29,11 @@ class ServerClass(Widget):
         dataList = []
         for item in data.iteritems():
             dataList.append(item)
+        #for key,value in data.iteritems():
+        #    dataList.append(key)
+        #    for key1, value1 in value.iteritems():
+        #        dataList.append(key1)
+        #        dataList.append(value1)
         self.allData = ""
         for item in dataList:
             self.allData += str(item) + "\n"

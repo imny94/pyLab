@@ -12,7 +12,7 @@ class Station():
 
     def __init__(self,stationNum):
         
-        self.name = "station%d" %self.stationNum
+        self.name = "station%d" %stationNum
         
         sensorLocation = sensorMap.sensorMap()
         self.stationData = sensorLocation['station_%d'%stationNum]  #{'Top' : {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24] } ,'Bottom' : {'motion_sensor' : 26 , 'sonar1' : [23,24] , 'sonar2' : [23,24]} }
@@ -164,6 +164,9 @@ class Station():
     def elapsedTime(self, activated_time):
         return time.time() - activated_time
         
+    def updateTime(self):
+            return time.strftime("%H:%M:%S|%d/%m/%y")
+        
     def execute(self):
 
         print "PIR Module Test (CTRL+C to exit)"
@@ -172,12 +175,9 @@ class Station():
         activated_time = time.time()
         
         
-        def updateTime():
-            return time.strftime("%H:%M:%S|%d/%m/%y")
-        
         try:
             noMotion = {'state' : 'Unoccupied' ,
-                    'updateTime' : updateTime()}
+                    'updateTime' : self.updateTime()}
             while 1:
                 if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
                     detectedMotion = self.MOTION()
@@ -209,7 +209,7 @@ class Station():
 #--------------------------------------END-----------------------------------------------------------------------------------------------------------
 
 def startProcessesFor(stationInstance):
-    p = multiprocessing.Process(target = stationInstance.execute)
+    p = multiprocessing.Process(target=stationInstance.execute)
     p.start()
     print "Process started for %s" %stationInstance.name
     
@@ -217,5 +217,7 @@ def startProcessesFor(stationInstance):
 station1 = Station(1)
 station2 = Station(2)
 
-startProcessesFor(station1)
-startProcessesFor(station2)
+if __name__ == '__main__':
+    pool = multiprocessing.Pool(processes=2)
+    result1 = pool.apply_async(station1.execute,)
+    result2 = pool.apply_async(station2.execute,)
