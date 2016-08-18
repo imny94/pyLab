@@ -212,12 +212,12 @@ def startProcessesFor(stationInstance):
     p = multiprocessing.Process(target=stationInstance.execute)
     p.start()
     print "Process started for %s" %stationInstance.name
+    return p
     
 
 station1 = Station(1)
 station2 = Station(2)
 
 if __name__ == '__main__':
-    pool = multiprocessing.Pool(processes=2)
-    result1 = pool.apply_async(station1.execute,)
-    result2 = pool.apply_async(station2.execute,)
+    p1 = startProcessesFor(station1)
+    p2 = startProcessesFor(station2)
