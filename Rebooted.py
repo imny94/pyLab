@@ -43,9 +43,9 @@ class Station():
 #---------------------------------------SONAR BLOCK----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    def sonar(self, sonar_sensor): #sonar_sensor should come in a list, with the form [trigger,echo]
+    def sonar(self): #sonar_sensor should come in a list, with the form [trigger,echo]
         #This will check the distance to object in front of the motion sensor to determine if the motion is nearby
-        Trigger,Echo = sonar_sensor
+        Trigger,Echo = self.sonarPin
         print "Getting Sonar Readings..."
         GPIO.setmode(GPIO.BCM)
         sound_speed = 330 # in meters
@@ -69,6 +69,10 @@ class Station():
         pulse_duration = pulse_end - pulse_start
         distance = pulse_duration * (sound_speed/2.0)
         
+        if distance > 3.0:
+            print "distance measured is not physically possible" 
+            return self.sonar()
+            
         print "station_%d reads %0.2f"%(self.stationNum,distance)
         return distance
 
@@ -81,11 +85,17 @@ class Station():
         
         print "Motion Detected by station_%d" %self.stationNum
         
-        print "Calling Sonar sensors 3 times, please wait for 6 seconds"
+        print "Calling Sonar sensors 9 times, please wait for 18 seconds"
         
-        rawMeasurements = ( self.sonar(self.sonarPin) ,  
-                            self.sonar(self.sonarPin) , 
-                            self.sonar(self.sonarPin) )
+        rawMeasurements = ( self.sonar() ,  
+                            self.sonar() , 
+                            self.sonar() ,
+                            self.sonar() ,  
+                            self.sonar() , 
+                            self.sonar() ,
+                            self.sonar() ,  
+                            self.sonar() , 
+                            self.sonar() )
                             # This takes in 3 measurements from the 2 sonar sensors in an alternate fashion, with each sensor given 2 seconds to rest in between
                             
         
@@ -123,7 +133,7 @@ class Station():
         sensorBlocked = 0.0  # These values need to be fine-tuned, this are just toy values
         upperLimit = 3.0
         lowerLimit = 0.0
-        occupiedUpper = 2.0
+        occupiedUpper = 1.3
         
         if distance <= lowerLimit:
             return "invalid_lower"
@@ -183,12 +193,14 @@ class Station():
         stdDev = numpy.std(Sonar1Min)
         mean = numpy.mean(Sonar1Min)
         state = self.eval_sonar(mean)
-        if state == "Occupied":
+        if state == "valid":
             if -tolerance <= stdDev <= tolerance:
                 q.put("OK")
             else:
+                print "standard deviation is too large"
                 q.put(None)
         else:
+            print " state from Sonar sensor != valid"
             q.put(None)
         
         print "For station %d"%self.stationNum
@@ -302,3 +314,11 @@ station2 = Station(2)
 if __name__ == '__main__':
     p1 = startProcessesFor(station1)
     p2 = startProcessesFor(station2)
+    
+def dataCollection(stationClass,sampleNumber):
+    dataList = []
+    endTime = time.time() + 120.0
+    while time.time() <= endTime:
+        dataList.append(stationClass.sonar())
+    stationClass.firebase.put('/', 'sampleSonar%d'%sampleNumber , dataList)
+    print dataList
