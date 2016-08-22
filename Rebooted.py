@@ -171,7 +171,7 @@ class Station():
             
     def sonarOccupancyChecker(self,q):
         
-        print "Running 1 minute check on Sonar"
+        print "Running 1 minute check on Sonar for station_%d"%self.stationNum
         
         tolerance = 0.3
         Sonar1Min = [self.sonar(self.sonarPin)]*30
