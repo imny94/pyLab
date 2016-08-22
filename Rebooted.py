@@ -260,8 +260,9 @@ class Station():
                             activated_time = time.time()
                             
                         else:
-                            print "q.get() value is : ", q.get()
-                            if q.get() != "OK": #If sonar distance does not check off, but the min motion checks off, the state reverts to "Unoccupied"
+                            sonarDistCheck = q.get()
+                            print "q.get() value is : ", sonarDistCheck
+                            if sonarDistCheck != "OK": #If sonar distance does not check off, but the min motion checks off, the state reverts to "Unoccupied"
                                 self.uploadToFirebase(noMotion)
                                 activated_time = time.time()
                             
