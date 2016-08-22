@@ -91,7 +91,7 @@ class Station():
         
         distance = (sum(rawMeasurements)/len(rawMeasurements))
         
-        print 'AVERAGED sonar for station_%d reads distance as : %0.2f' %self.stationNum,distance
+        print 'AVERAGED sonar for station_%d reads distance as : %0.2f' %(self.stationNum,distance)
         
         sonarState = self.eval_sonar(distance) # Returns either ('valid' , 'too_far' , 'blocked' , 'invalid_lower' , 'invalid_upper')
         
@@ -173,8 +173,13 @@ class Station():
         
         print "Running 1 minute check on Sonar for station_%d"%self.stationNum
         
+        endTime = time.time() + 60.0
         tolerance = 0.3
-        Sonar1Min = [self.sonar(self.sonarPin)]*30
+        Sonar1Min = []
+        
+        while time.time() <= endTime:
+            Sonar1Min += self.sonar(self.sonarPin)
+            
         stdDev = numpy.std(Sonar1Min)
         mean = numpy.mean(Sonar1Min)
         state = self.eval_sonar(mean)
@@ -242,6 +247,7 @@ class Station():
                     if self.elapsedTime(checkTime) <= 60: # Collects the number of times the motion sensor is activated for 1 minute
                         if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
                             motionOccurrance += 1
+                            print "No. of times motion detected : ", motionOccurrance 
                     else:
                         if motionOccurrance < minMotionOccurance: # Checks if there is enough motion within the 1 minute, if insufficient, state reverts to "Unoccupied"
                                   
@@ -249,6 +255,7 @@ class Station():
                             activated_time = time.time()
                             
                         else:
+                            print "q.get() value is : ", q.get()
                             if q.get() != "OK": #If sonar distance does not check off, but the min motion checks off, the state reverts to "Unoccupied"
                                 self.uploadToFirebase(noMotion)
                                 activated_time = time.time()
