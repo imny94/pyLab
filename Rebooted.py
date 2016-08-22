@@ -70,7 +70,7 @@ class Station():
         distance = pulse_duration * (sound_speed/2.0)
         
         if distance > 3.0:
-            print "distance measured is not physically possible" 
+            print "distance measured is not physically possible, re-measuring..." 
             return self.sonar()
             
         print "station_%d reads %0.2f"%(self.stationNum,distance)
@@ -188,7 +188,7 @@ class Station():
         Sonar1Min = []
         
         while time.time() <= endTime:
-            Sonar1Min.append(self.sonar(self.sonarPin))
+            Sonar1Min.append(self.sonar())
             
         stdDev = numpy.std(Sonar1Min)
         mean = numpy.mean(Sonar1Min)
@@ -217,7 +217,7 @@ class Station():
         checking = False
         alreadyChecked = False
         motionOccurrance = 0
-        minMotionOccurance = 10 #Need to calibrate
+        minMotionOccurance = 6 #Need to calibrate
         
         
         try:
@@ -265,9 +265,11 @@ class Station():
                         
                 else:
                     if self.elapsedTime(checkTime) <= 60: # Collects the number of times the motion sensor is activated for 1 minute
+                        print "countdown : %0.2f"%(self.elapsedTime(checkTime))
                         if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
                             motionOccurrance += 1
                             print "No. of times motion detected : ", motionOccurrance 
+                            time.sleep(1.0)
                     else:
                         if motionOccurrance < minMotionOccurance: # Checks if there is enough motion within the 1 minute, if insufficient, state reverts to "Unoccupied"
                                   
