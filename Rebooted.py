@@ -178,7 +178,7 @@ class Station():
         Sonar1Min = []
         
         while time.time() <= endTime:
-            Sonar1Min += self.sonar(self.sonarPin)
+            Sonar1Min.append(self.sonar(self.sonarPin))
             
         stdDev = numpy.std(Sonar1Min)
         mean = numpy.mean(Sonar1Min)
@@ -203,6 +203,7 @@ class Station():
         activated_time = time.time()
         counter = 1
         checking = False
+        alreadyChecked = False
         motionOccurrance = 0
         minMotionOccurance = 10 #Need to calibrate
         
@@ -218,13 +219,16 @@ class Station():
                         detectedMotion = self.MOTION()
                         
                         if detectedMotion['state'] == 'Occupied':
-                            self.uploadToFirebase(detectedMotion)
-                            activated_time = time.time()
-                            q = multiprocessing.Queue()
-                            sonarChecker = multiprocessing.Process(target=self.sonarOccupancyChecker,args=(q,))
-                            sonarChecker.start()
-                            checking = True
-                            checkTime = time.time()
+                            if alreadyChecked != True:
+                                self.uploadToFirebase(detectedMotion)
+                                activated_time = time.time()
+                                q = multiprocessing.Queue()
+                                sonarChecker = multiprocessing.Process(target=self.sonarOccupancyChecker,args=(q,))
+                                sonarChecker.start()
+                                checking = True
+                                checkTime = time.time()
+                            else:
+                                print 'Already checked, and state pressumed to be Occupied'
                             
                             
                         #else:
@@ -236,6 +240,7 @@ class Station():
                             
                             self.uploadToFirebase(noMotion)
                             activated_time = time.time()
+                            alreadyChecked = False
                         
                         if counter != 0: #This is to allow firebase to be updated whenever the program is re-started
                             self.uploadToFirebase(noMotion)
@@ -262,6 +267,7 @@ class Station():
                             
                         #If there is enough motion and the sonar distance checks off, nothing will be done and the state goes to "Occupied" as per usual    
                         checking = False
+                        alreadyChecked = True
                         motionOccurrance = 0
                         sonarChecker.terminate()
                 time.sleep(1.0)
