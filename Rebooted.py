@@ -171,6 +171,8 @@ class Station():
             
     def sonarOccupancyChecker(self,q):
         
+        print "Running 1 minute check on Sonar"
+        
         tolerance = 0.3
         Sonar1Min = [self.sonar(self.sonarPin)]*30
         stdDev = numpy.std(Sonar1Min)
@@ -183,6 +185,10 @@ class Station():
                 q.put(None)
         else:
             q.put(None)
+        
+        print "For station %d"%self.stationNum
+        print "mean is : %0.2f" %mean
+        print "Standard Deviation is : %0.2f"%stdDev
         
     def execute(self):
 
