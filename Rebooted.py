@@ -120,10 +120,10 @@ class Station():
 
     def sonar_state_checker(self, distance):
         
-        sensorBlocked = 0.3  # These values need to be fine-tuned, this are just toy values
-        upperLimit = 2.0
-        lowerLimit = 0.15
-        occupiedUpper = 1.0
+        sensorBlocked = 0.0  # These values need to be fine-tuned, this are just toy values
+        upperLimit = 3.0
+        lowerLimit = 0.0
+        occupiedUpper = 2.0
         
         if distance <= lowerLimit:
             return "invalid_lower"
