@@ -24,6 +24,7 @@ class Station():
         self.PIR_PIN = self.stationData['motion_sensor'] # 26 # probably can link with sensorMap to make this module general
         GPIO.setup(self.PIR_PIN, GPIO.IN)
         self.sonarPin = self.stationData['sonar1']
+        
 
 
 
@@ -35,7 +36,7 @@ class Station():
         self.firebase = fb.FirebaseApplication(url, token)
     
     def uploadToFirebase(self, motion):
-        print 'uploading to firebase ...'
+        print "uploading to firebase ...'%s'"%self.currentState
         self.firebase.put('/','py_lab/station_%d'%self.stationNum , motion)
         print ' \n Upload Complete! \n '
     
@@ -184,7 +185,7 @@ class Station():
         print "Running 1 minute check on Sonar for station_%d"%self.stationNum
         
         endTime = time.time() + 60.0
-        tolerance = 0.3
+        tolerance = 0.5
         Sonar1Min = []
         
         while time.time() <= endTime:
@@ -232,8 +233,8 @@ class Station():
                         
                         if detectedMotion['state'] == 'Occupied':
                             if alreadyChecked == False:
-                                self.uploadToFirebase(detectedMotion)
                                 self.currentState = "Occupied"
+                                self.uploadToFirebase(detectedMotion)
                                 activated_time = time.time()
                                 q = multiprocessing.Queue()
                                 sonarChecker = multiprocessing.Process(target=self.sonarOccupancyChecker,args=(q,))
@@ -244,21 +245,22 @@ class Station():
                                 print 'Already checked, and state pressumed to be Occupied'
                             
                             
-                        #else:
-                        #    if elapsedTime(activated_time) >= 900:
-                        #        uploadToFirebase(noMotion)
+                        else:
+                            #For the case where motion is detected, but the cause of the motion is not determined to be representative of Occupancy
+                            if self.elapsedTime(activated_time) >= 900:
+                                self.uploadToFirebase(noMotion)
                             
                     else:
-                        if self.elapsedTime(activated_time) >= 900: #15 minutes
+                        if self.elapsedTime(activated_time) >= 300: # 5 minutes to allow for short breaks in between
                             
-                            self.uploadToFirebase(noMotion)
                             self.currentState = "Unoccupied"
+                            self.uploadToFirebase(noMotion)
                             activated_time = time.time()
                             alreadyChecked = False
                         
                         if counter != 0: #This is to allow firebase to be updated whenever the program is re-started
-                            self.uploadToFirebase(noMotion)
                             self.currentState = "Unoccupied"
+                            self.uploadToFirebase(noMotion)
                             counter = 0
                         
                         print "no motion"
@@ -273,24 +275,34 @@ class Station():
                     else:
                         if motionOccurrance < minMotionOccurance: # Checks if there is enough motion within the 1 minute, if insufficient, state reverts to "Unoccupied"
                                   
-                            self.uploadToFirebase(noMotion)
                             self.currentState = "Unoccupied"
+                            self.uploadToFirebase(noMotion)
                             activated_time = time.time()
                             
                         else:
                             sonarDistCheck = q.get()
-                            print "q.get() value is : ", sonarDistCheck
+                            print "sonarDistCheck value is : ", sonarDistCheck
                             if sonarDistCheck != "OK": #If sonar distance does not check off, but the min motion checks off, the state reverts to "Unoccupied"
-                                self.uploadToFirebase(noMotion)
-                                self.currentState = "Unoccupied"
+                                self.currentState = "TemporaryUnoccupied"
                                 activated_time = time.time()
                             
-                        #If there is enough motion and the sonar distance checks off, nothing will be done and the state goes to "Occupied" as per usual    
+                        #If there is enough motion and the sonar distance checks off, nothing will be done and the state stays as "Occupied" as per usual    
+                            
                         checking = False
                         if self.currentState == "Occupied":
                             alreadyChecked = True
                         motionOccurrance = 0
                         sonarChecker.terminate()
+                        
+                if self.currentState == "TemporaryUnoccupied" and self.elapsedTime(activated_time) >= 120:  
+                    #This is to account for the fact that the data obtained normally exceeds the tolerance set 
+                    #for the standard deviation in the "confirmation" check done to determine occupancy after the station first registers the station as being occupied.
+                    #This will thus prevent the switching of states from "Occupied" to "Unoccupied" in firebase due to a 2 min buffer time given
+                    #Also, should there really be somebody there, 2 mins should be a good enough buffer time to trigger the motion sensor again, 
+                    #which should set the whole checking algorithm running again
+                    self.currentState == "Occupied"
+                    self.uploadToFirebase(noMotion)
+                    
                 time.sleep(1.0)
             
             #GPIO.add_event_detect(PIR_PIN_TOP, GPIO.RISING, callback=MOTION)
