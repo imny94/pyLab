@@ -1,0 +1,132 @@
+#: import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+ScreenManagement:
+    transition: FadeTransition()
+    HomeScreen:
+    AdvancedScreen:
+    
+<LabelwColor@Label>:
+    bcolor: 0.1,0,0,1
+    canvas.before:
+        Color:
+            rgba: self.bcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+   
+<StationLabel@LabelwColor>:
+    markup: True
+    font_size: 70
+    size_hint: 0.5,1
+    bcolor: 0.3,0.3,0.3,0.4
+    
+<StationInfo@LabelwColor>:
+    markup: True
+    font_size: 60
+    halign: 'center'
+    
+<OtherOptions@Button>:
+    markup: True
+    font_size: 70
+    background_color: 0.5,0.5,0.5,0.5
+    
+<HomeScreen>:
+    name: "Home"
+    Image: 
+        #source: 'C:/Users/Daniel/Desktop/Asense/mainscreenbg.png'
+        source: '/storage/emulated/0/kivy/Asense/mainscreenbg.png'
+        pos_hint: {'center_x':0.5, 'center_y':0.5}
+        allow_stretch: True
+        
+    BoxLayout:
+        spacing: 5
+        padding: 10
+        orientation: 'vertical'
+        
+        LabelwColor: 
+            text: '[i]Py Lab Station Occupancy[/i]'
+            markup: True
+            bcolor: 0.3,0.3,0.3,0.4
+            font_size: 100
+            size_hint: 1,0.6
+            
+        GridLayout:
+            spacing: 5
+            padding: 10
+            cols: 2
+        
+            StationLabel:
+                id: station_1
+                text: '[i]Station 1[/i]'
+                 
+            StationInfo:
+                text: root.serverInstance.allDataDict['station_1'] 
+                bcolor: root.serverInstance.colorscheme(self.text)
+                           
+            StationLabel:
+                id: station_2
+                text: '[i]Station 2[/i]'
+                 
+            StationInfo:
+                text: root.serverInstance.allDataDict['station_2']
+                bcolor: root.serverInstance.colorscheme(self.text)
+                          
+            StationLabel:
+                id: station_3
+                text: '[i]Station 3[/i]'
+                 
+            StationInfo:
+                text: root.serverInstance.allDataDict['station_3']
+                bcolor: root.serverInstance.colorscheme(self.text)
+                         
+        LabelwColor:
+            text: '[i]Last Refresh Time[/i] : ' + root.stations.refreshTime
+            markup: True
+            font_size: 50
+            bcolor: 0.3,0.3,0.3,0.4
+            size_hint: (1,0.3)         
+            
+        GridLayout:
+            spacing: 5
+            padding: 10
+            cols: 2
+            size_hint: (1,0.6)
+            
+            OtherOptions:
+                text: '[i]Refresh Page[/i]'
+                on_release: root.stations.refresh()
+                
+            OtherOptions:
+                text: '[i]Advanced[/i]'
+                on_release: app.root.current = 'Advanced'
+                
+<AdvancedScreen>:
+    name: "Advanced"
+    
+    Label:
+        text: root.stations.serverInstance.allDataStr
+        halign: 'center'
+        markup: True
+        font_size: 70
+    
+    GridLayout:
+        spacing: 5
+        padding: 10
+        rows: 2
+        size_hint: 1,0.4
+        
+        OtherOptions:
+            text: '[i]List All Data From Firebase[/i]'
+            on_release: root.stations.serverInstance.CompileAllFirebaseData()
+            
+        OtherOptions:
+            text: '[i]Quit Application[/i]'
+            on_release:root.stations.serverInstance.closeapp()
+        
+    FloatLayout:
+        OtherOptions:
+            color: 0,1,0,1
+            size_hint: 0.3,0.2
+            text: "Back"
+            on_release: app.root.current = 'Home'
+            pos_hint: {'right':1 , 'top':1}
