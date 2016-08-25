@@ -230,6 +230,7 @@ class Station():
                     
                     if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
                         detectedMotion = self.MOTION()
+                        counter = 0
                         
                         if detectedMotion['state'] == 'Occupied':
                             if alreadyChecked == False:
@@ -247,7 +248,7 @@ class Station():
                             
                         else:
                             #For the case where motion is detected, but the cause of the motion is not determined to be representative of Occupancy
-                            if self.elapsedTime(activated_time) >= 900:
+                            if self.elapsedTime(activated_time) >= 300:
                                 self.uploadToFirebase(noMotion)
                             
                     else:
@@ -285,23 +286,29 @@ class Station():
                             if sonarDistCheck != "OK": #If sonar distance does not check off, but the min motion checks off, the state reverts to "Unoccupied"
                                 self.currentState = "TemporaryUnoccupied"
                                 activated_time = time.time()
+                                tempTime = time.strftime("%H:%M:%S|%d/%m/%y")
+                                print "*****   Entering Temporary State for 2 mins... *****"
                             
                         #If there is enough motion and the sonar distance checks off, nothing will be done and the state stays as "Occupied" as per usual    
                             
                         checking = False
+                        print "current state is : %s" %self.currentState
                         if self.currentState == "Occupied":
                             alreadyChecked = True
                         motionOccurrance = 0
                         sonarChecker.terminate()
                         
-                if self.currentState == "TemporaryUnoccupied" and self.elapsedTime(activated_time) >= 120:  
-                    #This is to account for the fact that the data obtained normally exceeds the tolerance set 
-                    #for the standard deviation in the "confirmation" check done to determine occupancy after the station first registers the station as being occupied.
-                    #This will thus prevent the switching of states from "Occupied" to "Unoccupied" in firebase due to a 2 min buffer time given
-                    #Also, should there really be somebody there, 2 mins should be a good enough buffer time to trigger the motion sensor again, 
-                    #which should set the whole checking algorithm running again
-                    self.currentState == "Occupied"
-                    self.uploadToFirebase(noMotion)
+                if self.currentState == "TemporaryUnoccupied":
+                    print " In temp State Since : %s"%(tempTime)
+                    if self.elapsedTime(activated_time) >= 120:  
+                        #This is to account for the fact that the data obtained normally exceeds the tolerance set 
+                        #for the standard deviation in the "confirmation" check done to determine occupancy after the station first registers the station as being occupied.
+                        #This will thus prevent the switching of states from "Occupied" to "Unoccupied" in firebase due to a 2 min buffer time given
+                        #Also, should there really be somebody there, 2 mins should be a good enough buffer time to trigger the motion sensor again, 
+                        #which should set the whole checking algorithm running again
+                        self.currentState = "Unoccupied"
+                        self.uploadToFirebase(noMotion)
+                        
                     
                 time.sleep(1.0)
             
@@ -326,7 +333,7 @@ station1 = Station(1)
 station2 = Station(2)
 
 if __name__ == '__main__':
-    p1 = startProcessesFor(station1)
+##    p1 = startProcessesFor(station1)
     p2 = startProcessesFor(station2)
     
 def dataCollection(stationClass,sampleNumber):
