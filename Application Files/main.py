@@ -47,8 +47,8 @@ class ServerClass(Widget):
         if 'Occupied' in inp: return [0.8,0,0,0.8]
         else: return [0,0.8,0,0.8]
         
-    def _init_(self,**kwargs):
-        super(ServerClass, self).init_(**kwargs)
+    def __init__(self,**kwargs):
+        super(ServerClass, self).__init__(**kwargs)
         self.CompileAllFirebaseData()        
 
 #-------------------------------STATION CLASS-------------------------------------------
@@ -59,8 +59,8 @@ class StationData(Widget):
     refreshTime = StringProperty()
     stationDict = DictProperty()
     
-    def _init_(self, **kwargs):
-        super(StationData, self).init_(**kwargs)
+    def __init__(self, **kwargs):
+        super(StationData, self).__init__(**kwargs)
         self.stationDict = self.serverInstance.allDataDict# {'station_1' : {'state': "Occupied", 'updateTime': " time "} , 'station_2' ....}
         self.refreshTime = time.strftime("%H:%M:%S | %d/%m/%y")
         
@@ -90,5 +90,5 @@ class MainApp(App):
     def build(self):
         return presentation
             
-if _name == "main_":
+if __name__ == "__main__":
         MainApp().run()
