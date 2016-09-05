@@ -3,18 +3,13 @@ import time
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.properties import (DictProperty, ListProperty, ObjectProperty,
-                             StringProperty)
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.screenmanager import FadeTransition, Screen, ScreenManager
+from kivy.properties import (DictProperty, ListProperty, ObjectProperty, StringProperty)
+from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.widget import Widget
 
 import firebase
 import threading
-import multiprocessing
+
 
 #-------------------------------GLOBAL FUNCTIONS------------------------------------------
 
