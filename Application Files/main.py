@@ -1,15 +1,21 @@
-from kivy.lang import Builder
-from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
-from kivy.app import App
-import firebase
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.widget import Widget
-from kivy.uix.screenmanager import ScreenManager, Screen , FadeTransition
-from kivy.properties import StringProperty, DictProperty , ObjectProperty , ListProperty
 import time
- 
+
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.lang import Builder
+from kivy.properties import (DictProperty, ListProperty, ObjectProperty,
+                             StringProperty)
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.screenmanager import FadeTransition, Screen, ScreenManager
+from kivy.uix.widget import Widget
+
+import firebase
+import threading
+import multiprocessing
+
 #-------------------------------GLOBAL FUNCTIONS------------------------------------------
 
 url = "https://sizzling-torch-109.firebaseio.com/" 
@@ -63,6 +69,7 @@ class StationData(Widget):
         super(StationData, self).__init__(**kwargs)
         self.stationDict = self.serverInstance.allDataDict# {'station_1' : {'state': "Occupied", 'updateTime': " time "} , 'station_2' ....}
         self.refreshTime = time.strftime("%H:%M:%S | %d/%m/%y")
+
         
     def refresh(self):
         self.serverInstance.CompileAllFirebaseData()
@@ -72,10 +79,17 @@ class StationData(Widget):
     def getRefreshTime(self):
         return "[i]Last Refresh Time[/i] : %s" %self.refreshTime #we never used this function lol
 
+    def permaRefresh(self,dt):
+        print "Refreshing~~"
+        self.refresh()
+
 #-------------------------------GUI------------------------------------------------------
 
 class HomeScreen(Screen,StationData):
     stations = StationData()
+    constantRefresh = stations.permaRefresh
+    clockThread = threading.Thread(target = Clock.schedule_interval, args=((constantRefresh,1)))
+    clockThread.start()
        
 class AdvancedScreen(Screen,StationData):
     stations = StationData()
@@ -91,4 +105,8 @@ class MainApp(App):
         return presentation
             
 if __name__ == "__main__":
-        MainApp().run()
+        runApp = MainApp().run()
+        mainAppThread = threading.Thread(target = runApp)
+        mainAppThread.start()
+
+
