@@ -83,7 +83,7 @@ class StationData(Widget):
 class HomeScreen(Screen,StationData):
     stations = StationData()
     constantRefresh = stations.permaRefresh
-    clockThread = threading.Thread(target = Clock.schedule_interval, args=((constantRefresh,1)))
+    clockThread = threading.Thread(target = Clock.schedule_interval, args=((constantRefresh,5)))
     clockThread.start()
        
 class AdvancedScreen(Screen,StationData):
@@ -92,7 +92,7 @@ class AdvancedScreen(Screen,StationData):
 class ScreenManagement(ScreenManager):
     pass
 
-presentation = Builder.load_file('test.kv')
+presentation = Builder.load_file('Test1.kv')
 
 class MainApp(App):
     
