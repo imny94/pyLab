@@ -228,8 +228,8 @@ class Station():
                 
                 if checking == False:
                     
-                    if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
-                        detectedMotion = self.MOTION()
+                    if GPIO.input(self.PIR_PIN) == GPIO.HIGH: #Motion detected
+                        detectedMotion = self.MOTION()      # Starts 9 Sonar Checks
                         counter = 0
                         
                         if detectedMotion['state'] == 'Occupied':
@@ -238,8 +238,8 @@ class Station():
                                 self.uploadToFirebase(detectedMotion)
                                 activated_time = time.time()
                                 q = multiprocessing.Queue()
-                                sonarChecker = multiprocessing.Process(target=self.sonarOccupancyChecker,args=(q,))
-                                sonarChecker.start()
+                                sonarChecker = multiprocessing.Process(target=self.sonarOccupancyChecker,args=(q,)) 
+                                sonarChecker.start()            # Starts the 1 min checking
                                 checking = True
                                 checkTime = time.time()
                             else:
@@ -251,7 +251,7 @@ class Station():
                             if self.elapsedTime(activated_time) >= 300:
                                 self.uploadToFirebase(noMotion)
                             
-                    else:
+                    else: # No motion 
                         if self.elapsedTime(activated_time) >= 300: # 5 minutes to allow for short breaks in between
                             
                             self.currentState = "Unoccupied"
@@ -266,7 +266,7 @@ class Station():
                         
                         print "no motion"
                         
-                else:
+                else: # When doing checking
                     if self.elapsedTime(checkTime) <= 60: # Collects the number of times the motion sensor is activated for 1 minute
                         print "countdown : %0.2f"%(self.elapsedTime(checkTime))
                         if GPIO.input(self.PIR_PIN) == GPIO.HIGH:
